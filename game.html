@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="style.css">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital@0;1&display=swap" rel="stylesheet">
+        <title>Sudoku</title>
+    </head>
+
+    <body>
+        <div id="nav-bar">
+            <h1><a class="title-link" href="index.html">Sudoku</a></h1>
+            <nav>
+                <a href="index.html" onclick="change_language('en')">English</a>
+                <a href="index.html" onclick="change_language('hr')">Hrvatski</a>
+                <button id="btn_color_mode">Change colors</button>
+            </nav>
+        </div>
+
+        <div id="main-container">
+            <div class="left-side" id="sudoku_div"></div>
+            <div class="right-side">
+                <button id="btn_clear">Clear grid</button>
+                <div id="num-buttons"></div>
+            </div>
+        </div>
+    </body>
+
+    <script src="sudoku.js"></script>
+</html>

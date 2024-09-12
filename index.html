@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="style.css">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+        <style>
+            p{
+                font-size: larger;
+            }
+        </style>
+
+        <title>Sudoku</title>
+    </head>
+
+    <body>
+        <div id="nav-bar">
+            <h1><a class="title-link" href="index.html">Sudoku</a></h1>
+            <nav>
+                <a href="index.html" onclick="change_language('en')">English</a>
+                <a href="index.html" onclick="change_language('hr')">Hrvatski</a>
+                <button id="btn_color_mode">Change colors</button>
+            </nav>
+        </div>
+
+        <div>
+            <div class="left-side">
+                <p>Sudoku game in a static website in your browser!</p>
+                <div class="row">
+                    <a href="game.html?create"><button>Create a puzzle</button></a>
+                    <button>Import a puzzle</button>
+                </div>
+                <hr>
+                <p>Some example puzzles:</p>
+                
+            </div>
+        </div>
+    </body>
+</html>

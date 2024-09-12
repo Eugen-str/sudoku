@@ -1,0 +1,180 @@
+* {
+    font-family: "Noto Serif", system-ui;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-variation-settings: "wdth" 100;
+}
+
+.title-link {
+    color: black;
+    text-decoration: none;
+}
+
+.title-link.dark-mode {
+    color: white;
+}
+
+:root {
+    --secondary-dark: #1E201E;
+    --bg-dark: #3C3D37;
+    --primary-dark: #697580;
+    --fg-dark: #ECDFCC;
+}
+
+body {
+    background-color: #f0f0f0;
+}
+
+body.dark-mode {
+    background-color: var(--bg-dark);
+}
+
+h1, h2 {
+    color: black;
+}
+
+h1.dark-mode, h2.dark-mode {
+    color:white;
+}
+
+#nav-bar {
+    height: 10%;
+    display: flex;
+    text-align: center;
+    border-bottom: 3px solid black;
+}
+
+#nav-bar.dark-mode {
+    background-color: var(--secondary-dark);
+    border-bottom-color: var(--primary-dark);
+}
+
+#main-container {
+    height: 90%;
+    box-sizing: border-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+
+#main-container.dark-mode {
+    background-color: var(--bg-dark);
+}
+
+.left-side {
+    box-sizing: border-box;
+    -ms-flex: 50%;
+    flex: 50%;
+    background-color: #f1f1f1;
+    padding: 20px;
+}
+
+.left-side.dark-mode {
+    background-color: var(--bg-dark);
+}
+
+.right-side {
+    box-sizing: border-box;
+    border-left: 3px solid black;
+    -ms-flex: 50%;
+    flex: 50%;
+    background-color: #f1f1f1;
+    padding: 20px;
+}
+
+.right-side.dark-mode {
+    background-color: var(--bg-dark);
+    border-left-color: var(--primary-dark);
+}
+
+#sudoku_div {
+    float: left;
+    margin-bottom: 10px;
+    padding: 15px;
+}
+
+.row {
+    display: flex;
+}
+
+.cell {
+    border: 1px solid black;
+    padding: 5px 5px 5px 5px;
+
+    background-color: white;
+
+    font-size: 45px;
+    text-align: center;
+
+    cursor: pointer;
+
+    color: blue;
+}
+
+.cell.dark-mode {
+    background-color: var(--fg-dark);
+}
+
+.cell.selected {
+    box-shadow: inset 0px 0px 0px 5px blue;
+}
+
+.cell.dark-mode.selected {
+    box-shadow: inset 0px 0px 0px 5px var(--primary-dark);
+}
+
+.cell.vert_sep_right {
+    border-right-width: 4px;
+}
+
+.cell.hor_sep_bottom {
+    border-bottom-width: 4px;
+}
+
+.cell.vert_sep_left {
+    border-left-width: 4px;
+}
+
+.cell.hor_sep_top {
+    border-top-width: 4px;
+}
+
+.cell.nums {
+    color: black;
+    margin: 4px 4px 0px 0px;
+    border-radius: 5px;
+    background-color: #e0e0e0;
+}
+
+button {
+    font-size: 26px;
+}
+
+a {
+    color: blue;
+}
+
+a.dark-mode {
+    color: lightblue;
+}
+
+#level-list {
+    padding: 0px;
+    margin-top: 0px;
+}
+
+.level {
+    font-size: 26px;
+    color: black;
+    border-bottom: 2px solid black;
+    padding: 5px;
+
+    cursor:pointer;
+}
+
+.level.dark-mode {
+    color:white;
+    border-color:var(--primary-dark);
+}
