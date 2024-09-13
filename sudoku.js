@@ -1,9 +1,11 @@
 let sudoku_grid = [];
 let sudoku_grid_set = [];
+let color_grid = [];
 
 let selected = [];
-
+let selected_pad = 0;
 let color = "white";
+
 
 let cell_len = Math.floor((window.innerHeight - 300) / 9);
 
@@ -35,34 +37,62 @@ function unset_selected(){
 }
 
 function set_selected(x, y){
-    if(selected.length != 0){
-        document.getElementById("sudoku_div")
-            .querySelectorAll(`[xpos="${selected[0]}"][ypos="${selected[1]}"]`)[0]
-            .classList.remove("selected");
+    selected.push([x, y]);
+
+    if(selected.length == 1){
+        for(let cell_div of document.getElementById("sudoku_div")
+            .querySelectorAll(`[xpos][ypos]`))
+            cell_div.classList.remove("selected");
     }
 
-    selected = [x, y];
-
-    document.getElementById("sudoku_div")
+    //for(let sel_cel of selected){
+        document.getElementById("sudoku_div")
             .querySelectorAll(`[xpos="${x}"][ypos="${y}"]`)[0]
             .classList.add("selected");
+    //}
+}
+
+function unselect_selected(){
+    for(let sel_cel of selected){
+        let [x, y] = sel_cel;
+        document.getElementById("sudoku_div")
+            .querySelectorAll(`[xpos="${x}"][ypos="${y}"]`)[0]
+            .classList.remove("selected");
+    }
 }
 
 function update_selected(num){
-    let x = selected[0], y = selected[1];
     if(selected.length == 0){
         return;
     }
-    if(sudoku_grid_set[y][x] != -1){
-        console.log('fire');
-        return;
-    }
+    for(let sel_cel of selected){
+        let [x, y] = sel_cel;
+        if(sudoku_grid_set[y][x] != -1){
+            continue;
+        }
 
-    sudoku_grid[y][x] = num;
+        sudoku_grid[y][x] = num;
 
-    document.getElementById("sudoku_div")
+        document.getElementById("sudoku_div")
             .querySelectorAll(`[xpos="${x}"][ypos="${y}"]`)[0]
             .innerHTML = `${num}`;
+    }
+}
+
+function update_selected_color(col){
+    console.log('a');
+    if(selected.length == 0){
+        return;
+    }
+    for(let sel_cel of selected){
+        let [x, y] = sel_cel;
+
+        color_grid[y][x] = col;
+
+        document.getElementById("sudoku_div")
+            .querySelectorAll(`[xpos="${x}"][ypos="${y}"]`)[0]
+            .style.backgroundColor = col;
+    }
 }
 
 function init_grid(){
@@ -87,7 +117,6 @@ function reset_grid(){
     }
 }
 
-
 function init_grid_set(){
     sudoku_grid_set = [];
     for(let i = 0; i < 9; i++){
@@ -105,7 +134,6 @@ function show_sudoku(){
     container.innerHTML = "";
 
     let content = "";
-
 
     for(let i = 0; i < 9; i++){
         content += `<div class="row">`;
@@ -132,17 +160,15 @@ function show_sudoku(){
                 hor_border = "hor_sep_top";
             }
 
-            content += `<div class="cell ${vert_border} ${hor_border}" style="height:${cell_len}px; width:${cell_len}px;" xpos="${j}" ypos="${i}">${text}</div>`;
+            let current_color = color_grid[i][j];
+            content +=
+                `<div class="cell ${vert_border} ${hor_border}" style="background-color:${current_color}; height:${cell_len}px; width:${cell_len}px;" xpos="${j}" ypos="${i}">${text}</div>`;
         }
 
         content += `</div>`;
     }
 
     container.innerHTML = content;
-    /*for(cell of document.getElementsByClassName("cell")){
-        cell.style.width = `${cell_len}px`;
-        cell.style.height = `${cell_len}px`;
-    }*/
     change_color_mode();
     show_set_cells();
 
@@ -167,6 +193,19 @@ function show_set_cells(){
     }
 }
 
+function show_pad_buttons(){
+    let content = `
+        <div class="row">
+            <div id="btn-pad-num" class="cell nums"
+                 style="font-size:20px; height:${cell_len/2}px; width:${cell_len}px;">NUM</div>
+            <div id="btn-pad-col" class="cell nums"
+                 style="font-size:20px; height:${cell_len/2}px; width:${cell_len}px;">COL</div>
+        </div>
+    `;
+
+    document.getElementById("buttons-pad").innerHTML = content;
+}
+
 function show_num_buttons(){
     let content = "";
 
@@ -185,7 +224,36 @@ function show_num_buttons(){
 
     content += `<div class="cell nums" ${style} value="delete">C</div>`;
 
-    document.getElementById("num-buttons").innerHTML = content;
+    content += "</div>";
+
+    document.getElementById("selected-pad").innerHTML = content;
+}
+
+function show_color_buttons(){
+    let content = "";
+
+    let style = `height:${cell_len}px; width:${cell_len}px;`
+
+    let colors = [
+        "red", "orange", "yellow",
+        "darkgreen", "lightgreen", "blue",
+        "lightblue", "purple", "gray"
+    ];
+
+    for(let i = 0; i < 9; i++){
+        if(i % 3 == 0){
+            if(i != 0){
+                content += "</div>";
+            }
+            content += `<div class="row">`;
+        }
+
+        content += `<div class="cell nums" style="${style} background-color:${colors[i]};"></div>`;
+    }
+
+    content += "</div>";
+
+    document.getElementById("selected-pad").innerHTML = content;
 }
 
 function get_colors_from_cache(){
@@ -243,8 +311,12 @@ function arrow_key_controls(e){
     if(selected.length == 0){
         return;
     }
-    let newx = parseInt(selected[0]);
-    let newy = parseInt(selected[1]);
+    let last = selected[selected.length - 1];
+    if(!holding_ctrl){
+        selected = [];
+    }
+    let newx = parseInt(last[0]);
+    let newy = parseInt(last[1]);
 
     if(e.key == "ArrowUp"){
         if(newy != 0){
@@ -266,23 +338,28 @@ function arrow_key_controls(e){
             newx += 1;
         }
     }
-    if(selected[0] != newx || selected[1] != newy){
-        set_selected(newx, newy);
+    if(!holding_ctrl){
+        unselect_selected();
+    }
+    if(last[0] != newx || last[1] != newy){
+        set_selected(newx.toString(), newy.toString());
     }
 }
 
 function remove_selected(){
-    let x = parseInt(selected[0]);
-    let y = parseInt(selected[1]);
+    for(let sel_cel of selected){
+        let x = parseInt(sel_cel[0]);
+        let y = parseInt(sel_cel[1]);
 
-    if(sudoku_grid_set[x][y] != -1){
-        return;
+        if(sudoku_grid_set[y][x] == -1){
+            sudoku_grid[y][x] = -1;
+
+            document.getElementById("sudoku_div")
+                .querySelectorAll(`[xpos="${x}"][ypos="${y}"]`)[0]
+                .innerHTML = '';
+        }
     }
-    sudoku_grid[x][y] = -1;
-
-    document.getElementById("sudoku_div")
-            .querySelectorAll(`[xpos="${x}"][ypos="${y}"]`)[0]
-            .innerHTML = '';
+    //show_sudoku();
 }
 
 function write_encoded_board(){
@@ -343,12 +420,34 @@ function set_mode(){
     }
 }
 
+let selecting = false;
+let holding_ctrl = false;
+
+function init_color_grid(){
+    color_grid = [];
+    for(let i = 0; i < 9; i++){
+        let arr = [];
+        for(let j = 0; j < 9; j++){
+            arr.push("white");
+        }
+        color_grid.push(arr);
+    }
+}
+
 window.onload = function(){
+    init_color_grid();
+    show_pad_buttons();
     get_colors_from_cache();
     set_mode();
+
     document.getElementById("sudoku_div")
-            .addEventListener("click", function(e){
+            .addEventListener("mousedown", function(e){
+                if(!holding_ctrl){
+                    unselect_selected();
+                    selected = [];
+                }
                 const target = e.target;
+                selecting = true;
 
                 if(target.classList.contains("cell")){
                     let xpos = target.getAttribute("xpos");
@@ -356,19 +455,62 @@ window.onload = function(){
 
                     set_selected(xpos, ypos);
                 }
-            });
+    });
 
-    document.getElementById("num-buttons")
+    for(let cell_div of document.getElementsByClassName("cell")){
+        cell_div.addEventListener("mouseenter", function(e){
+            const target = e.target;
+
+            if(selecting){
+                let xpos = target.getAttribute("xpos");
+                let ypos = target.getAttribute("ypos");
+
+                set_selected(xpos, ypos);
+            }
+        });
+    }
+
+
+    document.getElementById("sudoku_div")
+            .addEventListener("mouseup", function(){
+                selecting = false;
+    });
+
+    document.getElementById("selected-pad")
             .addEventListener("click", function(e){
                 const target = e.target;
 
-                if(target.classList.contains("nums")){
-                    let num = target.getAttribute("value");
-                    if(num == "delete"){
-                        remove_selected();
-                    } else {
-                        update_selected(num);
+                if(selected_pad == 0){
+                    if(target.classList.contains("nums")){
+                        let num = target.getAttribute("value");
+                        if(num == "delete"){
+                            remove_selected();
+                        } else {
+                            update_selected(num);
+                        }
                     }
+                } else if(selected_pad == 1){
+                    if(target.classList.contains("nums")){
+                        let num = target.style.backgroundColor;
+                        if(num == "delete"){
+                            remove_selected();
+                        } else {
+                            update_selected_color(num);
+                        }
+                    }
+                }
+            });
+
+    document.getElementById("buttons-pad")
+            .addEventListener("click", function(e){
+                const target = e.target;
+
+                if(target.id == "btn-pad-num"){
+                    show_num_buttons();
+                    selected_pad = 0;
+                } else if (target.id == "btn-pad-col"){
+                    show_color_buttons();
+                    selected_pad = 1;
                 }
             });
 
@@ -380,10 +522,27 @@ window.onload = function(){
     });
 
     document.addEventListener("keydown", function(e){
-        arrow_key_controls(e);
+        if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)){
+            arrow_key_controls(e);
+        }
 
         if(e.key == "Backspace"){
             remove_selected();
+        }
+
+        if(e.key == "Control"){
+            holding_ctrl = true;
+        }
+
+        if(e.key == "Escape"){
+            unselect_selected();
+            selected = [];
+        }
+    });
+
+    document.addEventListener("keyup", function(e){
+        if(e.key == "Control"){
+            holding_ctrl = false;
         }
     });
 
