@@ -81,12 +81,20 @@ h1.dark-mode, h2.dark-mode {
     -ms-flex: 50%;
     flex: 50%;
     background-color: #f1f1f1;
-    padding: 20px;
 }
 
 .right-side.dark-mode {
     background-color: var(--bg-dark);
     border-left-color: var(--primary-dark);
+}
+
+.top-side {
+    height: 50%;
+    border-bottom: 3px solid black;
+}
+
+.bottom-side {
+    height: 40%;
 }
 
 #sudoku_div {
@@ -97,14 +105,14 @@ h1.dark-mode, h2.dark-mode {
 
 #selected-pad {
     width: max-content;
-    background-color: grey;
     padding: 10px;
     border-radius: 3px;
     margin:5px;
+    border: 2px solid black;
 }
 
 #selected-pad.dark-mode {
-    background-color: var(--secondary-dark);
+    border-color: var(--primary-dark);
 }
 
 .row {
@@ -163,6 +171,13 @@ h1.dark-mode, h2.dark-mode {
     background-color: #e0e0e0;
 }
 
+.cell.colors {
+    color: black;
+    margin: 2px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+}
+
 button {
     font-size: 26px;
 }
@@ -192,4 +207,36 @@ a.dark-mode {
 .level.dark-mode {
     color:white;
     border-color:var(--primary-dark);
+}
+
+#btn_clear, #rules-div {
+    margin-top: 10px;
+    margin-left: 20px;
+}
+
+#buttons-pad, #selected-pad {
+    margin-left: 20px;
+}
+
+#over {
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    z-index: 5;
+    position: fixed;
+    background-color: rgb(128, 128, 128, 0.5);
+}
+
+.overlay {
+    width: 40%;
+    height: 30%;
+    z-index: 6;
+    left: 30%;
+    top: 30%;
+    color: #cdcdcd;
+    font-size: 0.8em;
+    position: fixed;
+    background-color: white;
+    opacity: 1;
 }

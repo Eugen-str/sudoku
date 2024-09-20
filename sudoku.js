@@ -6,6 +6,25 @@ let selected = [];
 let selected_pad = 0;
 let color = "white";
 
+const default_mode = 0;
+const solve_mode = 1;
+const create_mode = 2;
+
+let mode = default_mode;
+
+const rule_normal = 0;
+const rule_normal_text = "Normal Sudoku: the digits 1-9 must be placed in each row, column and 3x3 box without repeating"
+const rule_killer = 1;
+const rule_killer_text = "Killer Sudoku: the sum of the digits within each marked cage is in the top-left corner of the cage";
+const rule_left_diagonal = 2;
+const rule_left_diagonal_text = "Rising diagonal: numbers on the increasing (positive) diagonal can not repeat";
+const rule_right_diagonal = 3;
+const rule_right_diagonal_text = "Rising diagonal: numbers on the decreasing (negative) diagonal can not repeat";
+const rule_kropki_white = 4;
+const rule_kropki_white_text = "White Kropki dots: cells seperated by a white dot must have consecutive digits";
+const rule_kropki_black = 4;
+const rule_kropki_black_text = "Black Kropki dots: the digits in cells seperated by a black dot must be in a 2:1 ratio";
+let ruleset = [];
 
 let cell_len = Math.floor((window.innerHeight - 300) / 9);
 
@@ -45,11 +64,9 @@ function set_selected(x, y){
             cell_div.classList.remove("selected");
     }
 
-    //for(let sel_cel of selected){
-        document.getElementById("sudoku_div")
-            .querySelectorAll(`[xpos="${x}"][ypos="${y}"]`)[0]
-            .classList.add("selected");
-    //}
+    document.getElementById("sudoku_div")
+        .querySelectorAll(`[xpos="${x}"][ypos="${y}"]`)[0]
+        .classList.add("selected");
 }
 
 function unselect_selected(){
@@ -194,12 +211,20 @@ function show_set_cells(){
 }
 
 function show_pad_buttons(){
+    let create_tools = "";
+    if(mode == create_mode){
+        create_tools = `
+            <div id="btn-pad-create" class="cell nums"
+                 style="font-size:20px; height:${cell_len/2}px; width:${cell_len}px;">SET</div>
+            `;
+    }
     let content = `
         <div class="row">
             <div id="btn-pad-num" class="cell nums"
                  style="font-size:20px; height:${cell_len/2}px; width:${cell_len}px;">NUM</div>
             <div id="btn-pad-col" class="cell nums"
                  style="font-size:20px; height:${cell_len/2}px; width:${cell_len}px;">COL</div>
+            ${create_tools}
         </div>
     `;
 
@@ -229,16 +254,35 @@ function show_num_buttons(){
     document.getElementById("selected-pad").innerHTML = content;
 }
 
-function show_color_buttons(){
+function popup(elem){
+    let button_close = `
+        <div class="btn-popup">
+            
+        </div>
+    `;
+    let over = document.createElement("div");
+    over.setAttribute("id", "popup-div");
+    over.innerHTML = elem;
+    document.body.appendChild(over);
+}
+
+function set_name(){
+    let content = `
+        <div class="overlay">
+            <h1>test</h1>
+        </div>
+        `;
+    popup(content);
+}
+
+function show_create_tools(){
+    console.log('test')
     let content = "";
 
-    let style = `height:${cell_len}px; width:${cell_len}px;`
+    let style = `font-size:35px; height:${cell_len}px; width:${cell_len*3}px;`
 
-    let colors = [
-        "red", "orange", "yellow",
-        "darkgreen", "lightgreen", "blue",
-        "lightblue", "purple", "gray"
-    ];
+    let texts = ["Set name", "Export", "Import"];
+    let funcs = ["set_name", "export_grid", "import_grid"];
 
     for(let i = 0; i < 9; i++){
         if(i % 3 == 0){
@@ -248,12 +292,58 @@ function show_color_buttons(){
             content += `<div class="row">`;
         }
 
-        content += `<div class="cell nums" style="${style} background-color:${colors[i]};"></div>`;
+        content += `<div class="cell nums" style="${style}" onclick="${funcs[i]}()">${texts[i]}</div>`;
     }
 
     content += "</div>";
 
     document.getElementById("selected-pad").innerHTML = content;
+}
+
+
+function show_color_buttons(){
+    let content = "";
+
+    let style = `height:${cell_len}px; width:${cell_len}px;`
+
+    let colors = ["#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "white"];
+
+    for(let i = 0; i < 9; i++){
+        if(i % 3 == 0){
+            if(i != 0){
+                content += "</div>";
+            }
+            content += `<div class="row">`;
+        }
+
+        content += `<div class="cell colors" style="${style} background-color:${colors[i]};"></div>`;
+    }
+
+    content += "</div>";
+
+    document.getElementById("selected-pad").innerHTML = content;
+}
+
+function show_rules(){
+    let content = "";
+
+    if(ruleset.length == 0){
+        content += rule_normal_text;
+    }
+
+    for(let rule of ruleset){
+        if(rule == rule_normal){
+            content += rule_normal_text;
+        } else if(rule == rule_killer){
+            content += rule_killer_text;
+        } else if(rule == rule_left_diagonal){
+            content += rule_left_diagonal_text;
+        } else if(rule == rule_right_diagonal){
+            content += rule_right_diagonal_text;
+        }
+    }
+
+    document.getElementById("rules-div").innerHTML = content;
 }
 
 function get_colors_from_cache(){
@@ -264,10 +354,6 @@ function get_colors_from_cache(){
         color = "white";
     }
     change_color_mode();
-}
-
-function load_random_level(){
-    console.log("loading random level not implemented yet!");
 }
 
 function decode_grid(code){
@@ -295,6 +381,33 @@ function decode_grid(code){
     }
 
     return grid;
+}
+
+function encode_grid(){
+    let code = "";
+    for(let i = 0; i < 9; i++){
+        let current_row = "";
+
+        let count = 1;
+        let last = sudoku_grid[i][0];
+        for(let j = 1; j < 9; j++){
+            let current = sudoku_grid[i][j];
+            if(current == last){
+                count++;
+            }
+            else{
+                let char = "e";
+                if(last != -1){
+                    char = `${last}`;
+                }
+                current_row += `${count}${char}`;
+                last = current;
+                count = 1;
+            }
+        }
+        code += current_row;
+    }
+    return code;
 }
 
 function load_level(code){
@@ -346,12 +459,19 @@ function arrow_key_controls(e){
     }
 }
 
+function backspace(){
+    if(remove_selected()) { return; }
+    if(remove_selected_colors()) { return; }
+}
+
 function remove_selected(){
+    let ret = false;
     for(let sel_cel of selected){
         let x = parseInt(sel_cel[0]);
         let y = parseInt(sel_cel[1]);
 
-        if(sudoku_grid_set[y][x] == -1){
+        if(sudoku_grid_set[y][x] == -1 && sudoku_grid[y][x] != -1){
+            ret = true;
             sudoku_grid[y][x] = -1;
 
             document.getElementById("sudoku_div")
@@ -359,16 +479,35 @@ function remove_selected(){
                 .innerHTML = '';
         }
     }
-    //show_sudoku();
+    return ret;
+}
+
+function remove_selected_colors(){
+    let ret = false;
+    for(let sel_cel of selected){
+        let x = parseInt(sel_cel[0]);
+        let y = parseInt(sel_cel[1]);
+
+        if(color_grid[y][x] != "white"){
+            color_grid[y][x] = "white";
+
+            document.getElementById("sudoku_div")
+                .querySelectorAll(`[xpos="${x}"][ypos="${y}"]`)[0]
+                .style.backgroundColor = "white";
+        }
+    }
+    return ret;
 }
 
 function write_encoded_board(){
     let code = "test";//encode_board();
 
     let code_div =
-        `<div id="encoded-board" class="row">
-            <h2>${code}</h2>
-            <button>Copy to clipboard</button>
+        `<div style="padding-top:5px;">
+        <div id="encoded-board" class="row">
+            <textarea readonly id="code-ta">${code}</textarea>
+            <button onclick="navigator.clipboard.writeText(document.getElementById('code-ta').value)">Copy to clipboard</button>
+        </div>
         </div>`;
 
     if(!document.getElementById("encoded-board")){
@@ -380,31 +519,22 @@ function write_encoded_board(){
     change_color_mode();
 }
 
-function show_create_tools(){
-    let tools = "";
-
-    tools += `<div class="cell nums" style="width:${cell_len*3}px;" onclick="write_encoded_board()">Export</div>`;
-
-    document.getElementsByClassName("right-side")[0].innerHTML += tools;
-}
-
-function create_mode(){
+function init_create_mode(){
     document.title = "Sudoku - Create mode"
     init_grid();
     init_grid_set();
-    show_num_buttons();
+    show_num_buttons("create_tools");
     show_sudoku();
-    show_create_tools();
 }
 
-function play_mode(code){
+function init_play_mode(code){
     document.title = "Sudoku - Solve mode"
     load_level(code);
     show_num_buttons();
     show_sudoku();
 }
 
-function default_mode(){
+function init_default_mode(){
     window.location.replace("index.html");
 }
 
@@ -412,11 +542,13 @@ function set_mode(){
     let code = url_params.get('code');
     let create = url_params.get('create');
     if(create == ''){
-        create_mode();
+        mode = create_mode;
+        init_create_mode();
     } else if(code){
-        play_mode(code);
+        mode = solve_mode;
+        init_play_mode(code);
     } else {
-        default_mode();
+        init_default_mode();
     }
 }
 
@@ -436,9 +568,10 @@ function init_color_grid(){
 
 window.onload = function(){
     init_color_grid();
-    show_pad_buttons();
     get_colors_from_cache();
     set_mode();
+    show_pad_buttons();
+    show_rules();
 
     document.getElementById("sudoku_div")
             .addEventListener("mousedown", function(e){
@@ -471,9 +604,8 @@ window.onload = function(){
     }
 
 
-    document.getElementById("sudoku_div")
-            .addEventListener("mouseup", function(){
-                selecting = false;
+    window.addEventListener("mouseup", function(){
+        selecting = false;
     });
 
     document.getElementById("selected-pad")
@@ -490,7 +622,7 @@ window.onload = function(){
                         }
                     }
                 } else if(selected_pad == 1){
-                    if(target.classList.contains("nums")){
+                    if(target.classList.contains("colors")){
                         let num = target.style.backgroundColor;
                         if(num == "delete"){
                             remove_selected();
@@ -498,6 +630,8 @@ window.onload = function(){
                             update_selected_color(num);
                         }
                     }
+                } else if(selected_pad == 2){
+                    // TODO: create tools
                 }
             });
 
@@ -511,6 +645,9 @@ window.onload = function(){
                 } else if (target.id == "btn-pad-col"){
                     show_color_buttons();
                     selected_pad = 1;
+                } else if (target.id == "btn-pad-create"){
+                    show_create_tools();
+                    selected_pad = 2;
                 }
             });
 
@@ -527,7 +664,7 @@ window.onload = function(){
         }
 
         if(e.key == "Backspace"){
-            remove_selected();
+            backspace();
         }
 
         if(e.key == "Control"){
